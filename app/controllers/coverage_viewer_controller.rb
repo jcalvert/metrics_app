@@ -1,3 +1,6 @@
+require 'zlib'
+require 'rubygems/package'
+
 class CoverageViewerController < ApplicationController
 	before_filter :ensure_user_signed_in
 	
@@ -14,8 +17,19 @@ class CoverageViewerController < ApplicationController
 
 	def s3_streamer
 		bucket=storage.directories.new({:key => S3_BUCKET})
-		filename = "#{params['sha']}/#{params['filename']}.#{params['ext']}"
-		render text: bucket.files.get(filename).body, :content_type => content_type_for(filename)
+		unless targz=Rails.cache.read(params['sha'])
+			file=bucket.files.detect{|file| !file.key.match(params['sha']).nil?}
+			Rails.cache.write(params['sha'], file.body) unless file.nil? 			
+			targz=file.body
+		end
+		tar_extract = Gem::Package::TarReader.new(Zlib::GzipReader.new(StringIO.new(targz)))
+		file = nil		
+		filename = "#{params['filename']}.#{params['ext']}"
+		tar_extract.each do |entry|
+			file = entry.read if entry.full_name.split.last == filename
+  		end
+		tar_extract.close
+		render text: file, :content_type => content_type_for(filename)
 	end
 
 	private
