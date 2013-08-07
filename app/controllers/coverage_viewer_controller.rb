@@ -16,6 +16,7 @@ class CoverageViewerController < ApplicationController
 	end
 
 	def s3_streamer
+		#would probably make more sense to just cache the file contents themselves in the cache
 		bucket=storage.directories.new({:key => S3_BUCKET})
 		unless targz=Rails.cache.read(params['sha'])
 			file=bucket.files.detect{|file| !file.key.match(params['sha']).nil?}
