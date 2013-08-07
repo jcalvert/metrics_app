@@ -1,5 +1,13 @@
-<% @shas.each do |sha| %>
-	<p>
-		Coverage report for: <a href="coverage_view/<%=sha%>/index.html"><%=sha%></a>
+<% @coverage_hash.each do |key, value| %>
+	<h3>Reports for <%=key%></h3>
+	<ul>
+		<% value.each do |report| %>
+			<% sha = report.first 
+			   build_id = report.last	
+			%>
+			<li>Coverage report for: <a href="coverage_view/<%=sha%>/index.html"><%=sha%></a>, <a href="https://magnum.travis-ci.com/<%=key%>/builds/<%=build_id%>">Travis Build</a></li>
+		<%end%>
+	</ul>
+		C 
 	</p>
 <% end %>

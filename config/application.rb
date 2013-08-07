@@ -3,6 +3,7 @@ require File.expand_path('../boot', __FILE__)
 require 'rails/all'
 
 GITHUB_ORG = ENV["GITHUB_ORGANIZATION"]
+S3_BUCKET = ENV['AWS_S3_BUCKET']
 
 if defined?(Bundler)
   # If you precompile assets before deploying to production, use this line
