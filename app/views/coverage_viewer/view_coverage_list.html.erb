@@ -3,9 +3,15 @@
 	<ul>
 		<% value.each do |report| %>
 			<% sha = report.first 
+			   percent = report[1]
 			   build_id = report.last	
 			%>
-			<li>Coverage report for: <a href="coverage_view/<%=sha%>/index.html"><%=sha[0..6]%></a>, Link to <a href="https://magnum.travis-ci.com/<%=key%>/builds/<%=build_id%>">Travis build</a></li>
+			<li>
+				<ul><li>Coverage report for: <a href="coverage_view/<%=sha%>/index.html"><%=sha[0..6]%></a></li>
+					<li>Percentage: <%=percent%></li>
+					<li>Link to <a href="https://magnum.travis-ci.com/<%=key%>/builds/<%=build_id%>">Travis build</a></li>
+				</ul>
+			</li>
 		<%end%>
 	</ul>
 <% end %>
