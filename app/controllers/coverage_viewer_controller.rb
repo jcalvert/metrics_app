@@ -6,8 +6,8 @@ class CoverageViewerController < ApplicationController
 		reports = bucket.files.select{|file| !file.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*$/).nil?}
 		triplets = reports.map { |report| report.key.split("_") }
 		@coverage_hash = triplets.reduce({}) do |memo, array|
-			memo[array[1]] || = []
-			memo[array[1]] << [[array.first, array.last]]
+			memo[array[1]] ||= []
+			memo[array[1]] << [array.first, array.last]
 			memo
 		end
 	end
