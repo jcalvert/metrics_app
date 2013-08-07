@@ -5,9 +5,7 @@
 			<% sha = report.first 
 			   build_id = report.last	
 			%>
-			<li>Coverage report for: <a href="coverage_view/<%=sha%>/index.html"><%=sha%></a>, <a href="https://magnum.travis-ci.com/<%=key%>/builds/<%=build_id%>">Travis Build</a></li>
+			<li>Coverage report for: <a href="coverage_view/<%=sha%>/index.html"><%=sha[0..6]%></a>, Link to <a href="https://magnum.travis-ci.com/<%=key%>/builds/<%=build_id%>">Travis build</a></li>
 		<%end%>
 	</ul>
-		C 
-	</p>
 <% end %>
