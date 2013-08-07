@@ -27,7 +27,7 @@ class CoverageViewerController < ApplicationController
 		file = nil		
 		filename = "#{params['filename']}.#{params['ext']}"
 		tar_extract.each do |entry|
-			file = entry.read if entry.full_name.split.last == filename
+			file = entry.read if entry.full_name.split('/').last == filename
   		end
 		tar_extract.close
 		render text: file, :content_type => content_type_for(filename)
