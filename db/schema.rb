@@ -11,7 +11,18 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130217183326) do
+ActiveRecord::Schema.define(:version => 20130809154913) do
+
+  create_table "coverage_reports", :force => true do |t|
+    t.string   "sha"
+    t.datetime "publication_date"
+    t.float    "coverage"
+    t.string   "key"
+    t.string   "repo"
+    t.string   "build_id"
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
+  end
 
   create_table "roles", :force => true do |t|
     t.string   "name"

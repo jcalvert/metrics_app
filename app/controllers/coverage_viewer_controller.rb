@@ -6,17 +6,14 @@ class CoverageViewerController < ApplicationController
 	before_filter :ensure_user_signed_in
 	
 	def view_coverage_list
-		bucket=storage.directories.new({:key => S3_BUCKET})
-		reports = bucket.files.select{|file| !file.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*$/).nil?}
-		triplets = reports.map { |report| report.key.split("_") }
-		#TODO: create a model for coverage reports
-		@coverage_hash = triplets.reduce({}) do |memo, array|
-			memo[array[1]] ||= []
-			coverage_index = get_file("index.html", array.first)
-			doc = Nokogiri::HTML(coverage_index)
-			percent = doc.xpath('//*[@id="report_table"]/tfoot/tr/td[4]/div[1]').first.content
-			memo[array[1]] << [array.first, percent, array.last]
+		persist_all_reports
+		@reports = CoverageReport.all.reduce({}) do |memo, report|
+			memo[report.repo] ||= []
+			memo[report.repo] << report
 			memo
+		end
+		@reports.values.each do |repo_array| 
+			repo_array.sort!{|report1, report2| report1.publication_date <=> report2.publication_date}
 		end
 	end
 
@@ -29,12 +26,11 @@ class CoverageViewerController < ApplicationController
 		def get_file(filename, sha)
 			file=Rails.cache.read("#{sha}/#{filename}")
 			return file unless file.nil?
-			bucket=storage.directories.new({:key => S3_BUCKET})
 			unless targz=Rails.cache.read(sha)
-				targz_file=bucket.files.detect{|bucket_file|!bucket_file.key.match(sha).nil?}
-				raise NotFoundError if targz_file.nil? 	
-				Rails.cache.write(sha, targz_file.body)		
-				targz=targz_file.body
+				targz_file=bucket.objects.detect{|bucket_file|!bucket_file.key.match(sha).nil?}
+				raise NotFoundError if targz_file.nil? 
+				targz=targz_file.read	
+				Rails.cache.write(sha, targz)						
 			end
 			tar_extract = Gem::Package::TarReader.new(Zlib::GzipReader.new(StringIO.new(targz)))
 			tar_extract.each do |entry|
@@ -55,9 +51,33 @@ class CoverageViewerController < ApplicationController
 			return type
 		end
 
-		def storage
-			@storage ||= Fog::Storage.new({:provider => "AWS",:aws_access_key_id => ENV["AWS_S3_KEY"],:aws_secret_access_key => ENV["AWS_S3_SECRET"],:region => ENV["AWS_S3_REGION"] || "us-east-1"})
-			@storage
+		def persist_all_reports
+			#temporary till builds that push all files rotate out
+			to_kill = bucket.objects.select{|file| file.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*$/).nil? }
+			to_kill.each{|f| f.delete}
+			reports = bucket.objects.select{|file| !file.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*$/).nil? }
+			known_reports = CoverageReport.all.collect{|report| report.key}
+			reports.each{|report| 
+				persist_report(report) unless known_reports.include?(report.key)
+			}
+		end
+
+		def persist_report(report)
+			sha, repo, build_id = report.key.split("_")
+			return unless sha && repo && build_id # skip things that don't match the pattern in the bucket
+			coverage = extract_percentage(sha).chop #66.58%
+			CoverageReport.create(:sha => sha, :repo => repo, :build_id => build_id, :coverage => coverage, :key => report.key, :publication_date => report.last_modified)
+		end
+
+		def extract_percentage(sha)
+			coverage_index = get_file("index.html", sha)
+			doc = Nokogiri::HTML(coverage_index)
+			doc.xpath('//*[@id="report_table"]/tfoot/tr/td[4]/div[1]').first.content
+		end
+
+		def bucket
+			@bucket ||= AWS::S3.new.buckets[S3_BUCKET]
+			@bucket
 		end
 
 		class NotFoundError < StandardError

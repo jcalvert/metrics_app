@@ -19,7 +19,7 @@ gem "cancan", ">= 1.6.8"
 gem "rolify", ">= 3.2.0"
 
 gem "figaro", ">= 0.5.3"
-gem 'fog'
+gem 'aws-sdk'
 
 group :development do
   gem "quiet_assets", ">= 1.0.1"

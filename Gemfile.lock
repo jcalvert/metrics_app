@@ -29,6 +29,10 @@ GEM
       i18n (~> 0.6)
       multi_json (~> 1.0)
     arel (3.0.2)
+    aws-sdk (1.14.1)
+      json (~> 1.4)
+      nokogiri (< 1.6.0)
+      uuidtools (~> 2.1)
     better_errors (0.6.0)
       coderay (>= 1.0.0)
       erubis (>= 2.6.6)
@@ -48,24 +52,12 @@ GEM
     coffee-script-source (1.4.0)
     debug_inspector (0.0.2)
     erubis (2.7.0)
-    excon (0.25.3)
     execjs (1.4.0)
       multi_json (~> 1.0)
     faraday (0.8.5)
       multipart-post (~> 1.1)
     figaro (0.5.3)
       rails (~> 3.0)
-    fog (1.14.0)
-      builder
-      excon (~> 0.25.0)
-      formatador (~> 0.2.0)
-      mime-types
-      multi_json (~> 1.0)
-      net-scp (~> 1.1)
-      net-ssh (>= 2.1.3)
-      nokogiri (~> 1.5)
-      ruby-hmac
-    formatador (0.2.4)
     hashie (1.2.0)
     hike (1.2.1)
     httpauth (0.2.0)
@@ -83,7 +75,6 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.21)
-    mini_portile (0.5.1)
     minitest (4.6.1)
     minitest-spec-rails (4.3.8)
       minitest (~> 4.3)
@@ -92,11 +83,7 @@ GEM
       minitest (>= 2.3.1)
     multi_json (1.6.1)
     multipart-post (1.1.5)
-    net-scp (1.1.2)
-      net-ssh (>= 2.6.5)
-    net-ssh (2.6.8)
-    nokogiri (1.6.0)
-      mini_portile (~> 0.5.0)
+    nokogiri (1.5.10)
     oauth2 (0.8.0)
       faraday (~> 0.8)
       httpauth (~> 0.1)
@@ -143,7 +130,6 @@ GEM
     rdoc (3.12.1)
       json (~> 1.4)
     rolify (3.2.0)
-    ruby-hmac (0.4.0)
     sass (3.2.5)
     sass-rails (3.2.6)
       railties (~> 3.2.0)
@@ -171,18 +157,19 @@ GEM
       kgio (~> 2.6)
       rack
       raindrops (~> 0.7)
+    uuidtools (2.1.4)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  aws-sdk
   better_errors (>= 0.6.0)
   binding_of_caller (>= 0.6.9)
   bootstrap-sass (>= 2.3.0.0)
   cancan (>= 1.6.8)
   coffee-rails (~> 3.2.1)
   figaro (>= 0.5.3)
-  fog
   jquery-rails
   minitest-spec-rails (>= 4.3.8)
   minitest-wscolor (>= 0.0.3)
