@@ -7,7 +7,6 @@ class CreateCoverageReports < ActiveRecord::Migration
       t.string :key
       t.string :repo
       t.string :build_id
-
       t.timestamps
     end
   end

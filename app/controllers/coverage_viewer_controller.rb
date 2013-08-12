@@ -53,9 +53,15 @@ class CoverageViewerController < ApplicationController
 
 		def persist_all_reports
 			#temporary till builds that push all files rotate out
-			to_kill = bucket.objects.select{|file| file.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*$/).nil? }
+			to_kill = bucket.objects.select do |file|
+				file.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*$/).nil? && 
+				file.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*_travis_branch_*$/).nil?
+			end
 			to_kill.each{|f| f.delete}
-			reports = bucket.objects.select{|file| !file.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*$/).nil? }
+			reports = bucket.objects.select do |file| 
+				!file.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*$/).nil? ||
+				!file.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*_travis_branch_*$/).nil?
+			end
 			known_reports = CoverageReport.all.collect{|report| report.key}
 			reports.each{|report| 
 				persist_report(report) unless known_reports.include?(report.key)
@@ -63,10 +69,16 @@ class CoverageViewerController < ApplicationController
 		end
 
 		def persist_report(report)
-			sha, repo, build_id = report.key.split("_")
+			if !report.key.match(/^[a-z0-9]*_[a-zA-Z0-9\/]*_[0-9]*_travis_branch_*$/).nil?
+				first, second = report.key.split("_travis_branch_")
+			else
+				first, second = report.key, nil
+			end
+			sha, repo, build_id = first.split("_")
 			return unless sha && repo && build_id # skip things that don't match the pattern in the bucket
-			coverage = extract_percentage(sha).chop #66.58%
-			CoverageReport.create(:sha => sha, :repo => repo, :build_id => build_id, :coverage => coverage, :key => report.key, :publication_date => report.last_modified)
+			coverage = extract_percentage(sha).chop 
+			CoverageReport.create(:sha => sha, :repo => repo, :build_id => build_id, :coverage => coverage, 
+				:key => report.key, :publication_date => report.last_modified, :branch => second)
 		end
 
 		def extract_percentage(sha)

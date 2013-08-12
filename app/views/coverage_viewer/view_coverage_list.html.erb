@@ -3,11 +3,12 @@
 	<ul>
 		<% value.each do |report| %>			
 			<li>
-				<ul class="list-inline">
+				<ul class="inline">
 					<li>Coverage report for: <a href="coverage_view/<%=report.sha%>/index.html"><%=report.sha[0..6]%></a></li>
 					<li>Percentage: <%=report.coverage%>% - change from mean: <%=report.derivation%>%</li>
 					<li>Link to <a href="https://magnum.travis-ci.com/<%=key%>/builds/<%=report.build_id%>">Travis build</a></li>
 					<li>Publication date: <%=report.publication_date%></li>
+					<li>Branch: <%=report.branch%></li>
 				</ul>
 			</li>
 		<%end%>
